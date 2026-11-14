@@ -1,3 +1,8 @@
 #!/bin/bash
+
+if [ $# -gt 0 ]; then
+    exec "$(which gufw-pkexec)" "$@"
+fi
+
 c_user=$(whoami)
 pkexec "$(which gufw-pkexec)" $c_user

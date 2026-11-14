@@ -16,17 +16,36 @@
 # along with Gufw; if not, see http://www.gnu.org/licenses for more
 # information.
 
-from gufw.controller import Controller 
-from gufw.instance   import Instance
-from gufw.view.gufw  import Gufw
+import sys
 
 
 if __name__ == '__main__':
-    
+    # Intercept CLI flags before importing GTK/GUI modules
+    if len(sys.argv) > 1 and any(arg.startswith('-') for arg in sys.argv[1:]):
+        from gufw.cli import run_cli
+        run_cli()
+        sys.exit(0)
+
+
+    # Check if a graphical display (X11 or Wayland) is available before starting the UI
+    import gi
+    gi.require_version('Gdk', '3.0')
+    from gi.repository import Gdk
+
+    if Gdk.Display.get_default() is None:
+        print("\nError: No graphical display detected (X11 or Wayland).\n", file=sys.stderr)
+        from gufw.cli import print_help
+        print_help()
+        sys.exit(1)
+
+
+    # Otherwise, start the GTK GUI normally
+    from gufw.controller import Controller
+    from gufw.instance   import Instance
+    from gufw.view.gufw  import Gufw
+
+
     app_instance = Instance()
-    
     controler = Controller()
-    
     gufw = Gufw(controler.get_frontend())
-    
     app_instance.exit_app()
